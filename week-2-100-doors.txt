@@ -1,0 +1,38 @@
+The answer is 10 because there are ten perfect squares
+between 1 and 100 (the squares of 1 through 10) and
+because a door is left open if and only if its index
+is a perfect square.
+
+Why a door will be left open at the end of the 100-Doors
+probelm if and only if the index of the door is a perfect
+square:
+
+During round N, we start by visiting N and all multiples of
+N up to 100.  Hence, in round N, we visit all doors whose
+indices are divisible by N.
+
+The dual: now instead of thinking about each 'round' of the
+process described in the 100-Doors problem statement
+and which doors must be visited in a given round, think
+from the perspective of each of the 100 doors and reason
+about which rounds will visit the given door.
+
+So from the perspective of a given door M, we ask how many
+numbers in [1, M] divide M -- that will be the number of
+times door M is visited in the 100-Doors problem.
+
+All doors start closed.  When a door is visited it is opened if
+it was previously closed and closed if previously open.  So we
+see that at the end of the 100-Doors problem, a door is open
+if and only if that door is visited an odd number of times.
+
+So how do we determine whether a door at index M will be
+visited an odd number of times?  We don't need to count
+the numbers in [1, M] that divide M.  Instead, note that if a
+number Q in [1, M] divides M, then (M/Q) also divides M.
+So if door M is visited in round Q, it will also be visited
+in round (M/Q); that's two visits for each number that
+divides M -- except in the case of Q = (M/Q).  If Q = (M/Q),
+we will have one visit to M that is not offset by another visit.
+And and integer Q = (M/Q) divides M if and only if M is a
+perfect square.
