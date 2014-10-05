@@ -2,7 +2,7 @@ doors = [1..100]
 
 
 countDoorsOpen :: [Int] -> Int
-countDoorsOpen doorIndices = (sum . map isOpen) doorIndices
+countDoorsOpen = (sum . map isOpen)
 
 
 isOpen :: Int -> Int  -- returns 1 for open, 0 for closed
