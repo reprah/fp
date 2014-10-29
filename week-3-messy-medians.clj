@@ -27,7 +27,7 @@
 ;    - calculate the state we want to rollback to and fetch it from the states map/dictionary
 ;    - set the state for this iteration to the rolled-back state
 ;    - print the median of this current state
-     - recurse w/ new values
+;    - recurse w/ new values
 ;  if we're not rolling back,
 ;    - add the current number to the previous set of numbers
 ;    - calculate the median of that
