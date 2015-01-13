@@ -1,10 +1,10 @@
 GRAPH1 = """
-    A -> BEF
-    B -> ACE
-    C -> BDE
-    D -> CEF
-    E -> ABCDF
-    F -> ADE
+    A -> BEEF
+    B -> ACCE
+    C -> BBDE
+    D -> CEFF
+    E -> AABCDF
+    F -> ADDE
 """
 
 
@@ -18,11 +18,11 @@ def traverse_edge(edge, graph):
     def _update_nodes(graph):
         for node,neighbors in graph.iteritems():
             if node == from_node:
-                yield node, neighbors.replace(to_node, '')
+                yield node, neighbors.replace(to_node, '', 1)
             elif node == to_node:
-                yield node, neighbors.replace(from_node, '')
+                yield node, neighbors.replace(from_node, '', 1)
             else:
-                yield (node, neighbors)
+                yield node, neighbors
 
     from_node, to_node = edge
     assert from_node in graph[to_node] and to_node in graph[from_node]
@@ -58,26 +58,22 @@ def has_eulerian_path(graph):
         non_bridges = (e for e in candidate_edges if not is_bridge(e, graph))
         return frozenset(next(non_bridges, default_edge))
 
-    starting_node = next(n for n,neighbors in graph.iteritems() if neighbors)
+    def _traverse(graph, node, traversed_edges):
+        edge = _next_edge(node)
+        if not edge:
+            return node, traversed_edges
+        else:
+            new_graph = traverse_edge(edge, graph)
+            new_node  = next(n for n in edge if n != node)
+            return _traverse(new_graph, new_node, traversed_edges + [edge])
 
+    starting_node = next((n for n,neighbors in graph.iteritems() if neighbors), None)
     if not starting_node:
         return len(graph.keys()) in (0, 1)
 
-    current_node = starting_node
-    to_traverse_queue = [ _next_edge(current_node) ]
-    traversed = set()
     all_graph_edges = all_edges(graph)
-
-    while to_traverse_queue:
-        edge = to_traverse_queue.pop()
-        graph = traverse_edge(edge, graph)
-        traversed.add(edge)
-        current_node = next(n for n in edge if n != current_node)
-        next_edge = _next_edge(current_node)
-        if next_edge:
-            to_traverse_queue.append(next_edge)
-
-    return current_node == starting_node and traversed == all_graph_edges
+    end_node, traversed_edges = _traverse(graph, starting_node, [])
+    return end_node == starting_node and set(traversed_edges) == all_graph_edges
 
 
 def all_edges(graph):  #, one_node=None):
@@ -93,14 +89,14 @@ def main(graph=GRAPH1):
 
 def tests():
     graph = """
-        a -> bc
-        b -> ac
+        a -> bbc
+        b -> aac
         c -> abd
         d -> ce
         e -> d
     """
     g = parse_graph(graph)
-    assert traverse_edge('ab', g) == {'a': 'c', 'b': 'c', 'c': 'abd', 'd': 'ce', 'e': 'd'}
+    assert traverse_edge('ab', g) == {'a': 'bc', 'b': 'ac', 'c': 'abd', 'd': 'ce', 'e': 'd'}
 
     g2 = g.copy()
     g2['d'] = 'c'
@@ -112,8 +108,14 @@ def tests():
     assert is_bridge('de', g)
     assert not is_bridge('ab', g)
 
-    assert all_edges(g) == set([frozenset(['e', 'd']), frozenset(['c', 'b']), frozenset(['a', 'c']), frozenset(['a', 'b']), frozenset(['c', 'd'])])
-    assert all_edges(g2) == set([frozenset(['c', 'b']), frozenset(['a', 'c']), frozenset(['a', 'b']), frozenset(['c', 'd'])])
+    assert all_edges(g) == set([frozenset(['e', 'd']), frozenset(['c', 'b']),
+                                frozenset(['a', 'c']), frozenset(['a', 'b']),
+                                frozenset(['c', 'd'])])
+    assert all_edges(g2) == set([frozenset(['c', 'b']), frozenset(['a', 'c']),
+                                 frozenset(['a', 'b']), frozenset(['c', 'd'])])
+
+    assert not has_eulerian_path(g)
+    assert has_eulerian_path(parse_graph(GRAPH1))
 
     assert main()
 
