@@ -1,4 +1,4 @@
-# require 'pry'
+require 'pry'
 
 graph = [
   [:a, :e], [:a, :b], [:a, :c],
@@ -14,10 +14,11 @@ graph2 = [
   [:f, :d]
 ] 
 
-graph3 = [
+graph_with_circuit = [
   [:a, :f], [:a, :e], [:a, :e], [:a, :b],
-  [:f, :d], [:f, :d], [:f, :c], [:e, :c],
-  [:e, :b], [:e, :d], [:b, :c], [:d, :c]
+  [:f, :d], [:f, :e], [:f, :d], [:b, :c],
+  [:e, :c], [:e, :b], [:e, :d], [:b, :c],
+  [:d, :c]
 ]
 
 def dfs(graph, start_node, visited_nodes = [])
@@ -60,10 +61,14 @@ def has_eulerian_path?(graph)
   vertices_with_odd_degrees(graph).count == 2
 end
 
+def has_eulerian_circuit?(graph)
+  vertices_with_odd_degrees(graph).count == 0
+end
+
 def eulerian_path(graph)
-  if has_eulerian_path?(graph)
+  if has_eulerian_path?(graph) || has_eulerian_circuit?(graph)
     path = []
-    start_node = vertices_with_odd_degrees(graph).keys[0]
+    start_node = vertices_with_odd_degrees(graph).keys[0] || graph[0][0]
     current_edge = graph.detect { |edge| edge.include?(start_node) }
     next_node = nil
     until graph.empty? do
@@ -75,7 +80,7 @@ def eulerian_path(graph)
         next_node = current_edge.reject { |n| n == start_node }[0]
       end
       path.push(current_node)
-      graph = graph.reject { |edge| edge == current_edge }
+      graph = graph.tap { |g| g.delete_at(g.index(current_edge)) }
       next_edge_candidates = graph.select { |edge| edge.include?(next_node) }
       bridges = find_bridges(graph)
       non_bridges = next_edge_candidates.reject { |edge| bridges.include?(edge) }
@@ -93,4 +98,4 @@ def eulerian_path(graph)
   end
 end
 
-p eulerian_path(graph2)
+p eulerian_path(graph_with_circuit)
